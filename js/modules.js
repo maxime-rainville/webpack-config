@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 /**
  * Exports the settings for javascript modules in webpack.config
  *
@@ -8,6 +10,10 @@
  * @returns {{rules: Array.<*>}}
  */
 module.exports = (ENV, { MODULES, THIRDPARTY }) => {
+  const tsconfigPath = fs.existsSync('tsconfig.json') ?
+    'tsconfig.json' :
+    `${MODULES}/@silverstripe/webpack-config/tsconfig.json`;
+
   return {
     rules: [
       {
@@ -26,6 +32,14 @@ module.exports = (ENV, { MODULES, THIRDPARTY }) => {
           comments: false,
           cacheDirectory: (ENV !== 'production'),
         },
+      },
+      {
+        test: /\.tsx?$/,
+        exclude: new RegExp(`(${MODULES}|${THIRDPARTY})`),
+        use: [
+          'babel-loader',
+          `ts-loader?configFile=${tsconfigPath}`
+        ]
       },
       {
         test: /\.(png|gif|jpe?g|svg)$/,
